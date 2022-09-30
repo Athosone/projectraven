@@ -1,0 +1,63 @@
+VERSION 0.6
+FROM ../+base
+
+ARG DEV="true"
+ARG TAG="dev"
+
+IF [ "$DEV" = "true" ]
+  ENV DISTROLESS_TAG=debug
+ELSE
+  ENV DISTROLESS_TAG=nonroot
+END
+
+deps:
+  DO ../+DEPS --DEV=$DEV
+  # DO github.com/projectraven+DEPS --DEV=$DEV
+  SAVE IMAGE --cache-hint
+
+build:
+  FROM +deps
+  DO ../+GOBUILD --project_name=tracking --project_path=./cmd/tracking --version=$TAG
+
+docker:
+  FROM ../+distrolessBase --DISTROLESS_TAG=$DISTROLESS_TAG
+  ARG TAG
+  COPY +build/app/bin/ /app
+  EXPOSE 8080
+  ENTRYPOINT ["/app/tracking"]
+  SAVE IMAGE docker.io/athosone/projectraventracking:$TAG
+
+tests:
+  FROM +deps
+  COPY . .
+  RUN ginkgo run -r -p --randomize-all -race --label-filter="!integration" . 
+
+runIntTests:
+  FROM +deps
+  COPY . .
+  ENV CONFIG_PATH="/config"
+  ENTRYPOINT ginkgo run -r -p --randomize-all -race --label-filter="integration" . 
+
+intTests:
+  FROM earthly/dind:alpine
+  COPY docker-compose.yaml .
+  COPY config/dev/config.yaml /appconfig/config.yaml
+
+  WITH DOCKER --load tests:latest=+runIntTests --compose docker-compose.yaml --service mongodb --service redis
+      RUN docker run --network=host -e CONFIG_PATH="/config" -v /appconfig:/config tests:latest
+  END
+
+docs:
+  FROM +deps
+  RUN go install github.com/go-swagger/go-swagger/cmd/swagger@v0.25.0
+  COPY . .
+  RUN swagger generate spec -o swagger.json --scan-models      
+  RUN swagger generate spec -o swagger.yaml --scan-models      
+  SAVE ARTIFACT swagger.json AS LOCAL docs/swagger.json
+  SAVE ARTIFACT swagger.yaml AS LOCAL docs/swagger.yaml
+
+serveDoc:
+  FROM +doc
+  EXPOSE 8081
+  ENTRYPOINT swagger serve docs/swagger.json -p 8081 --no-open
+  SAVE IMAGE github.com/athosone/projectraventracking/docs:$TAG

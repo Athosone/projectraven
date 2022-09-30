@@ -1,0 +1,102 @@
+{
+  "swagger": "2.0",
+  "info": {},
+  "paths": {
+    "/user/register": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": [
+              "[]"
+            ]
+          }
+        ],
+        "description": "Register a new user",
+        "consumes": [
+          "application/vnd.athosone.projectraven.registerUser+json; v=1"
+        ],
+        "produces": [
+          "application/vnd.athosone.projectraven.user+*; v=1"
+        ],
+        "tags": [
+          "user"
+        ],
+        "operationId": "registerUser",
+        "parameters": [
+          {
+            "type": "object",
+            "name": "registerUserInput",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/registerUserInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/registerUserResponse"
+          },
+          "400": {
+            "$ref": "#/responses/validationError"
+          },
+          "401": {
+            "$ref": "#/responses/errorResponse"
+          },
+          "403": {
+            "$ref": "#/responses/errorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/errorResponse"
+          },
+          "default": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "user": {
+      "description": "UserModel",
+      "type": "object",
+      "properties": {
+        "email": {
+          "description": "The user email",
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "id": {
+          "description": "The user id",
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "idp": {
+          "description": "The user identity provider",
+          "type": "string",
+          "x-go-name": "IDP",
+          "example": "google"
+        }
+      },
+      "x-go-name": "UserModelV1",
+      "x-go-package": "github.com/athosone/projectraven/tracking/internal/api/rest"
+    }
+  },
+  "responses": {
+    "registerUserResponse": {
+      "description": "Register user response",
+      "schema": {
+        "type": "object",
+        "required": [
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "$ref": "#/definitions/user"
+          }
+        }
+      }
+    }
+  }
+}
