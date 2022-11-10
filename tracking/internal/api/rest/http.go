@@ -2,6 +2,7 @@ package rest
 
 import (
 	"net/http"
+	"strings"
 
 	gserver "github.com/athosone/golib/pkg/server"
 	gmiddleware "github.com/athosone/golib/pkg/server/middleware"
@@ -18,11 +19,11 @@ type HttpServer struct {
 }
 
 type HttpServerConfig struct {
+	Addr    string
 	IsDebug bool
 }
 
-func NewHttpServer(application *app.Application, logger *zap.SugaredLogger, cfg HttpServerConfig) HttpServer {
-
+func NewHttpServer(application *app.Application, logger *zap.SugaredLogger, cfg HttpServerConfig) *HttpServer {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(gmiddleware.InjectLoggerInRequest(func(r *http.Request) *zap.SugaredLogger {
@@ -32,13 +33,14 @@ func NewHttpServer(application *app.Application, logger *zap.SugaredLogger, cfg 
 	r.Use(gmiddleware.CompressResponse())
 	r.Use(middleware.Heartbeat("/healthy"))
 	r.Use(middleware.Recoverer)
+	r.Use(openApi)
 
 	r.Get("/ready", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	r.Route("/openapi", func(api chi.Router) {
-
+	r.Route("/api", func(api chi.Router) {
+		AddUserRoutes(api, NewUserHandler(application.Commands.UserCommands))
 	})
 
 	if cfg.IsDebug {
@@ -47,7 +49,7 @@ func NewHttpServer(application *app.Application, logger *zap.SugaredLogger, cfg 
 		r.Handle("/openapi/", http.StripPrefix("/openapi/", http.FileServer(http.Dir("./docs"))))
 	}
 
-	return HttpServer{
+	return &HttpServer{
 		Mux:    r,
 		app:    application,
 		logger: logger,
@@ -59,4 +61,14 @@ func (s *HttpServer) Run(addr string) error {
 	s.logger.Info("Starting server on ", addr)
 	gserver.ListenAndServe(server)
 	return nil
+}
+
+func openApi(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Index(r.URL.Path, "/openapi") == 0 || strings.Index(r.URL.Path, "/openapi/") == 0 {
+			http.StripPrefix("/openapi", http.FileServer(http.Dir("./internal/api/rest/docs/swagger/swagger-ui/"))).ServeHTTP(w, r)
+			return
+		}
+		handler.ServeHTTP(w, r)
+	})
 }

@@ -11,6 +11,7 @@ import (
 
 type AppConfig struct {
 	Service struct {
+		Host            string `yaml:"host"`
 		Port            int    `yaml:"port"`
 		RequestIdHeader string `yaml:"requestIdHeader"`
 	} `yaml:"service"`
@@ -22,6 +23,12 @@ type AppConfig struct {
 
 	// IsDebug
 	IsDebug bool `yaml:"isDebug"`
+
+	// MQTT
+	MQTT struct {
+		Broker   string `yaml:"broker"`
+		ClientID string `yaml:"clientID"`
+	} `yaml:"mqtt"`
 }
 
 // LoadConfig loads the configuration from the environment variable CONFIG_PATH.LoadConfig
@@ -32,15 +39,21 @@ func LoadConfig() (cfg *AppConfig, err error) {
 
 	_ = viper.BindEnv("isDebug", "IS_DEBUG")
 	_ = viper.BindEnv("service.port", "SERVICE_PORT")
+	_ = viper.BindEnv("service.host", "SERVICE_HOST")
 	_ = viper.BindEnv("service.requestIdHeader", "SERVICE_REQUEST_ID_HEADER")
 	_ = viper.BindEnv("database.connectionString", "DATABASE_CONNECTION_STRING")
 	_ = viper.BindEnv("database.databaseName", "DATABASE_DATABASE_NAME")
+	_ = viper.BindEnv("mqtt.broker", "MQTT_BROKER")
+	_ = viper.BindEnv("mqtt.clientID", "MQTT_CLIENT_ID")
 
 	viper.SetDefault("isDebug", "true")
-	viper.SetDefault("service.port", "5000")
+	viper.SetDefault("service.port", "5001")
+	viper.SetDefault("service.host", "0.0.0.0")
 	viper.SetDefault("service.requestIdHeader", middleware.RequestIDHeader)
 	viper.SetDefault("database.connectionString", "mongodb://localhost:27017")
 	viper.SetDefault("database.databaseName", "projectraven")
+	viper.SetDefault("mqtt.broker", "mqtts://liveobjects.orange-business.com:8883")
+	viper.SetDefault("mqtt.clientID", "projectraven-tracking")
 
 	cfg, err = config.LoadConfig[AppConfig](os.Getenv("CONFIG_PATH"))
 	if err == nil {

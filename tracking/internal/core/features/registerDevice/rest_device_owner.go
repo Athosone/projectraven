@@ -1,4 +1,4 @@
-package rest
+package registerdevice
 
 import (
 	"net/http"

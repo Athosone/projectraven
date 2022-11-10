@@ -13,4 +13,3 @@ type DeviceOwnerCommands struct{}
 type UserCommands struct {
 	RegisterUser *RegisterUserCommandHandler
 }
-

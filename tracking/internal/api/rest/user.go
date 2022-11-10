@@ -1,5 +1,6 @@
 package rest
 
+//TODO: This file should move to the same package as the handler / feature
 import (
 	"net/http"
 
