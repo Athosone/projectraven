@@ -14,6 +14,7 @@ type positionChangedMessage struct {
 	DeviceId  string  `json:"deviceId"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+	Timestamp int64   `json:"timestamp"`
 }
 
 func (m *PositionChangedDeviceHandler) HandleDevicePositionChanged(ctx context.Context, payload []byte, messageId string) error {

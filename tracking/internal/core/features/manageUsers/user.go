@@ -1,11 +1,10 @@
-package rest
+package manageusers
 
-//TODO: This file should move to the same package as the handler / feature
+//TODO: Implement this, as of now it is just placeholder code
 import (
 	"net/http"
 
 	"github.com/athosone/golib/pkg/server/routing"
-	app "github.com/athosone/projectraven/tracking/internal/application"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -28,7 +27,7 @@ type UserHandler interface {
 
 type userHandler struct{}
 
-func NewUserHandler(app.UserCommands) UserHandler {
+func NewUserHandler() UserHandler {
 	return &userHandler{}
 }
 

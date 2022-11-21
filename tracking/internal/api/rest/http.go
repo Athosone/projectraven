@@ -6,7 +6,6 @@ import (
 
 	gserver "github.com/athosone/golib/pkg/server"
 	gmiddleware "github.com/athosone/golib/pkg/server/middleware"
-	app "github.com/athosone/projectraven/tracking/internal/application"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
@@ -14,7 +13,6 @@ import (
 
 type HttpServer struct {
 	*chi.Mux
-	app    *app.Application
 	logger *zap.SugaredLogger
 }
 
@@ -23,7 +21,7 @@ type HttpServerConfig struct {
 	IsDebug bool
 }
 
-func NewHttpServer(application *app.Application, logger *zap.SugaredLogger, cfg HttpServerConfig) *HttpServer {
+func NewHttpServer(logger *zap.SugaredLogger, cfg HttpServerConfig) *HttpServer {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(gmiddleware.InjectLoggerInRequest(func(r *http.Request) *zap.SugaredLogger {
@@ -40,7 +38,7 @@ func NewHttpServer(application *app.Application, logger *zap.SugaredLogger, cfg 
 	})
 
 	r.Route("/api", func(api chi.Router) {
-		AddUserRoutes(api, NewUserHandler(application.Commands.UserCommands))
+		// AddUserRoutes(api, NewUserHandler(application.Commands.UserCommands))
 	})
 
 	if cfg.IsDebug {
@@ -51,9 +49,12 @@ func NewHttpServer(application *app.Application, logger *zap.SugaredLogger, cfg 
 
 	return &HttpServer{
 		Mux:    r,
-		app:    application,
 		logger: logger,
 	}
+}
+
+func (s *HttpServer) AddRoute(pattern string, router func(r chi.Router)) {
+	s.Mux.Route(pattern, router)
 }
 
 func (s *HttpServer) Run(addr string) error {

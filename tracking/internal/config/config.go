@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"flag"
@@ -29,6 +29,12 @@ type AppConfig struct {
 		Broker   string `yaml:"broker"`
 		ClientID string `yaml:"clientID"`
 	} `yaml:"mqtt"`
+
+	Feature struct {
+		FollowPosition struct {
+			Topic string `yaml:"topic"`
+		} `yaml:"followPosition"`
+	} `yaml:"feature"`
 }
 
 // LoadConfig loads the configuration from the environment variable CONFIG_PATH.LoadConfig
@@ -45,6 +51,7 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	_ = viper.BindEnv("database.databaseName", "DATABASE_DATABASE_NAME")
 	_ = viper.BindEnv("mqtt.broker", "MQTT_BROKER")
 	_ = viper.BindEnv("mqtt.clientID", "MQTT_CLIENT_ID")
+	_ = viper.BindEnv("feature.followPosition.topic", "FEATURE_FOLLOW_POSITION_TOPIC")
 
 	viper.SetDefault("isDebug", "true")
 	viper.SetDefault("service.port", "5001")
@@ -54,11 +61,9 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	viper.SetDefault("database.databaseName", "projectraven")
 	viper.SetDefault("mqtt.broker", "mqtts://liveobjects.orange-business.com:8883")
 	viper.SetDefault("mqtt.clientID", "projectraven-tracking")
+	viper.SetDefault("feature.followPosition.topic", "followPosition")
 
 	cfg, err = config.LoadConfig[AppConfig](os.Getenv("CONFIG_PATH"))
-	if err == nil {
-		middleware.RequestIDHeader = cfg.Service.RequestIdHeader
-	}
 	if *debug {
 		cfg.IsDebug = *debug
 	}

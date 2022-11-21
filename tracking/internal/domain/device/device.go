@@ -1,4 +1,4 @@
-package device
+package domainDevice
 
 type Device struct {
 	ID       string

@@ -38,9 +38,10 @@ func NewMQTTServer(logger *zap.SugaredLogger, cfg MQTTServerConfig) (*MQTTServer
 
 func (l *MQTTServer) Subscribe(ctx context.Context, topic string, handler MessageHandler) error {
 	l.rwLock.Lock()
-	defer l.rwLock.Unlock()
 	l.handlers[topic] = append(l.handlers[topic], handler)
-	token := l.client.Subscribe(topic, 1, func(client mqtt.Client, msg mqtt.Message) {
+	l.rwLock.Unlock()
+	
+  token := l.client.Subscribe(topic, 1, func(client mqtt.Client, msg mqtt.Message) {
 		if err := handler(ctx, msg.Payload(), fmt.Sprint(msg.MessageID())); err != nil {
 			fmt.Printf("Error handling message: %v", err)
 			return

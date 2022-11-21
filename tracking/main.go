@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/athosone/projectraven/tracking/internal/config"
 	"go.uber.org/zap"
 )
 
@@ -23,7 +24,7 @@ func init() {
 }
 
 func main() {
-	cfg, err := LoadConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		panic(err)
 	}

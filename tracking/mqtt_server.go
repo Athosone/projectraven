@@ -1,7 +1,11 @@
 package main
 
-import "context"
+import (
+	"context"
 
-func startMQTTComponents(ctx context.Context, cfg *AppConfig) {
+	"github.com/athosone/projectraven/tracking/internal/config"
+)
+
+func startMQTTComponents(ctx context.Context, cfg *config.AppConfig) {
 	// TODO: implement
 }

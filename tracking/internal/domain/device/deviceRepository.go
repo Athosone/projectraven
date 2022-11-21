@@ -1,4 +1,4 @@
-package device
+package domainDevice
 
 type DeviceRepository interface {
 	FindById(id string) (*Device, error)
