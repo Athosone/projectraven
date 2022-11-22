@@ -1,10 +1,15 @@
 package main
 
 import (
-	"context"
+	"net/http"
 	"os"
 
 	"github.com/athosone/projectraven/tracking/internal/config"
+	followposition "github.com/athosone/projectraven/tracking/internal/core/features/followPosition"
+	manageusers "github.com/athosone/projectraven/tracking/internal/core/features/manageUsers"
+	"github.com/athosone/projectraven/tracking/internal/infrastructure"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
 
@@ -24,20 +29,46 @@ func init() {
 }
 
 func main() {
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		panic(err)
-	}
-	if cfg.IsDebug {
-		logger.Info("debug mode enabled")
-	}
+	fx.New(
+		// fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
+		// 	return &fxevent.ZapLogger{Logger: log}
+		// }),
+		fx.Provide(
+			func() *zap.Logger { return logger.Desugar() },
+			config.LoadConfig,
+			// Command handlers
+			followposition.NewSavePositionCommandHandler,
 
-	// TODO: bind context to signals
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+			// REST part
+			newRestServer,
+			// cf.: https://uber-go.github.io/fx/get-started/another-handler.html
+			AsRoute(manageusers.NewRestUserHandler),
+			fx.Annotate(
+				newChi,
+				fx.ParamTags(`group:"routes"`),
+			),
+			createServer,
 
-	go startHTTPComponents(ctx, cfg)
-	go startMQTTComponents(ctx, cfg)
+			// MQTT part
+			AsMQTTMessageListener(followposition.NewPositionChangedMessageHandler),
+			newMQTTListener,
+			fx.Annotate(
+				subscribeListeners,
+				fx.ParamTags(`group:"mqttListeners"`),
+			),
 
-	<-ctx.Done()
+			// Repositories
+			infrastructure.NewDeviceRepository,
+
+			// Database
+			newMongoDB,
+		),
+		fx.Invoke(func(*http.Server) {}),
+		fx.Invoke(func(mqtt.Client) {}),
+	).Run()
+
+	// go startHTTPComponents(ctx, cfg)
+	// go startMQTTComponents(ctx, cfg)
+
+	// <-ctx.Done()
 }

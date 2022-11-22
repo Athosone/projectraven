@@ -5,15 +5,12 @@ import (
 
 	api "github.com/athosone/projectraven/tracking/internal/api/mqtt"
 	"github.com/athosone/projectraven/tracking/internal/config"
-	"github.com/athosone/projectraven/tracking/internal/infrastructure"
-	"github.com/athosone/projectraven/tracking/mongodb"
+	domainDevice "github.com/athosone/projectraven/tracking/internal/domain/device"
 )
 
-func WireFollowPositionFeature(ctx context.Context, cfg config.AppConfig, server *api.MQTTServer) error {
-	deviceRepository, err := infrastructure.NewDeviceRepository(ctx, mongodb.Database)
-	if err != nil {
-		return err
-	}
+func WireFollowPositionFeature(ctx context.Context, cfg config.AppConfig,
+	deviceRepository domainDevice.DeviceRepository,
+	server *api.MQTTServer) error {
 	savePositionHandler, err := NewSavePositionCommandHandler(deviceRepository)
 	if err != nil {
 		return err

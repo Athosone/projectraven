@@ -25,7 +25,6 @@ type MQTTServer struct {
 	handlers map[string][]MessageHandler
 }
 
-// TODO: Use this module to refacto the http one, also make sure it follows vertical slice
 func NewMQTTServer(logger *zap.SugaredLogger, cfg MQTTServerConfig) (*MQTTServer, error) {
 	cli, err := mqttcli.NewClient(cfg.Broker, cfg.ClientID)
 	if err != nil {
@@ -40,8 +39,8 @@ func (l *MQTTServer) Subscribe(ctx context.Context, topic string, handler Messag
 	l.rwLock.Lock()
 	l.handlers[topic] = append(l.handlers[topic], handler)
 	l.rwLock.Unlock()
-	
-  token := l.client.Subscribe(topic, 1, func(client mqtt.Client, msg mqtt.Message) {
+
+	token := l.client.Subscribe(topic, 1, func(client mqtt.Client, msg mqtt.Message) {
 		if err := handler(ctx, msg.Payload(), fmt.Sprint(msg.MessageID())); err != nil {
 			fmt.Printf("Error handling message: %v", err)
 			return
@@ -53,4 +52,8 @@ func (l *MQTTServer) Subscribe(ctx context.Context, topic string, handler Messag
 		return fmt.Errorf("error subscribing to topic %s: %w", topic, token.Error())
 	}
 	return nil
+}
+
+func (m *MQTTServer) Client() mqtt.Client {
+	return m.client
 }

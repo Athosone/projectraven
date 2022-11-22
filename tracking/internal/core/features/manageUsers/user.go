@@ -13,22 +13,22 @@ const (
 	ConsumeRegisterUserInputV1 = "application/vnd.athosone.projectraven.registerUser+json; v=1"
 )
 
-func AddUserRoutes(router chi.Router, handler UserHandler) {
+type UserHandler struct {
+}
+
+func NewRestUserHandler() *UserHandler {
+	return &UserHandler{}
+}
+
+func (handler *UserHandler) AddRoutes(router chi.Router) {
 	router.Route("/user", func(r chi.Router) {
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Get user"))
+		})
 		userRouter := routing.NewRouter()
 		userRouter.Post(handler.RegisterUser).Consume(ConsumeRegisterUserInputV1).Produce(ProduceUserV1).SetDefault()
 		r.Mount("/register", userRouter)
 	})
-}
-
-type UserHandler interface {
-	RegisterUser(w http.ResponseWriter, r *http.Request)
-}
-
-type userHandler struct{}
-
-func NewUserHandler() UserHandler {
-	return &userHandler{}
 }
 
 // swagger:route POST /user/register user registerUser
@@ -54,7 +54,7 @@ func NewUserHandler() UserHandler {
 //	  in: body
 //	  required: true
 //	  type: registerUserInput
-func (h *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Not implemented"))
 }
 

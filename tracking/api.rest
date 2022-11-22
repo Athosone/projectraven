@@ -1,0 +1,11 @@
+### Register user
+POST http://localhost:5001/api/user/register
+Accept: application/vnd.athosone.projectraven.user+json; v=1
+Content-Type: application/vnd.athosone.projectraven.registerUser+json; v=1
+
+{
+  "email": "toe@toe.com"
+}
+
+### Get user
+GET http://localhost:5001/api/user

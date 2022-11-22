@@ -4,10 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	mqttcli "github.com/athosone/projectraven/tracking/internal/api/mqtt"
 )
 
 type PositionChangedDeviceHandler struct {
 	handler *SavePositionCommandHandler
+}
+
+func NewPositionChangedMessageHandler(handler *SavePositionCommandHandler) *PositionChangedDeviceHandler {
+	return &PositionChangedDeviceHandler{handler: handler}
 }
 
 type positionChangedMessage struct {
@@ -28,4 +34,8 @@ func (m *PositionChangedDeviceHandler) HandleDevicePositionChanged(ctx context.C
 		return fmt.Errorf("error handling command: %w", err)
 	}
 	return nil
+}
+
+func (m *PositionChangedDeviceHandler) SubscribeToTopic(ctx context.Context, server *mqttcli.MQTTServer) error {
+	return server.Subscribe(ctx, "device.position.changed", m.HandleDevicePositionChanged)
 }
