@@ -66,9 +66,4 @@ func main() {
 		fx.Invoke(func(*http.Server) {}),
 		fx.Invoke(func(mqtt.Client) {}),
 	).Run()
-
-	// go startHTTPComponents(ctx, cfg)
-	// go startMQTTComponents(ctx, cfg)
-
-	// <-ctx.Done()
 }
