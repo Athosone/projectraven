@@ -19,9 +19,9 @@ func NewClient(broker string, clientID string) (mqtt.Client, error) {
 		SetAutoAckDisabled(true)
 
 	client = mqtt.NewClient(opts)
-	err := client.Connect().Error()
-	if err != nil {
-		return nil, fmt.Errorf("error connecting to MQTT broker: %w", err)
+	token := client.Connect()
+	if !token.Wait() || token.Error() != nil {
+		return nil, fmt.Errorf("error connecting to MQTT broker: %w", token.Error())
 	}
 	return client, nil
 }

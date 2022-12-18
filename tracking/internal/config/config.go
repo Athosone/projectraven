@@ -59,7 +59,7 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	viper.SetDefault("service.requestIdHeader", middleware.RequestIDHeader)
 	viper.SetDefault("database.connectionString", "mongodb://localhost:27017")
 	viper.SetDefault("database.databaseName", "projectraven")
-	viper.SetDefault("mqtt.broker", "mqtts://liveobjects.orange-business.com:8883")
+	viper.SetDefault("mqtt.broker", "mqtt://localhost:1883")
 	viper.SetDefault("mqtt.clientID", "projectraven-tracking")
 	viper.SetDefault("feature.followPosition.topic", "followPosition")
 

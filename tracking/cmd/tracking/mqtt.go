@@ -33,10 +33,11 @@ func newMQTTListener(cfg *config.AppConfig) (*mqttcli.MQTTServer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error creating MQTT client: %w", err)
 	}
-
-	if token := srv.Client().Connect(); token.Wait() && token.Error() != nil {
-		err := token.Error()
-		return nil, fmt.Errorf("error connecting to MQTT broker: %w", err)
+	if !srv.Client().IsConnected() {
+		if token := srv.Client().Connect(); token.Wait() && token.Error() != nil {
+			err := token.Error()
+			return nil, fmt.Errorf("error connecting to MQTT broker: %w", err)
+		}
 	}
 	return srv, nil
 }

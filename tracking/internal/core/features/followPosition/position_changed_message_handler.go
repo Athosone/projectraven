@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	mqttcli "github.com/athosone/projectraven/tracking/internal/api/mqtt"
+	"github.com/athosone/projectraven/tracking/internal/core/features/followPosition/contracts"
 )
 
 type PositionChangedDeviceHandler struct {
@@ -16,20 +17,18 @@ func NewPositionChangedMessageHandler(handler *SavePositionCommandHandler) *Posi
 	return &PositionChangedDeviceHandler{handler: handler}
 }
 
-type positionChangedMessage struct {
-	DeviceId  string  `json:"deviceId"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-	Timestamp int64   `json:"timestamp"`
-}
-
 func (m *PositionChangedDeviceHandler) HandleDevicePositionChanged(ctx context.Context, payload []byte, messageId string) error {
-	var p positionChangedMessage
+	var p contracts.PositionChangedMessage
 	if err := json.Unmarshal(payload, &p); err != nil {
 		return fmt.Errorf("error unmarshaling message: %w", err)
 	}
 	handler := m.handler
-	cmd := SavePositionCommand(p)
+	cmd := SavePositionCommand{
+		DeviceId:  p.DeviceId,
+		Latitude:  p.Position.Lat,
+		Longitude: p.Position.Long,
+		Timestamp: p.Timestamp,
+	}
 	if err := handler.Handle(cmd); err != nil {
 		return fmt.Errorf("error handling command: %w", err)
 	}

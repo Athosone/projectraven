@@ -5,6 +5,15 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    volumes:
+      - ./tools/mosquitto-config/:/mosquitto/config/:ro
+      - mosquitto-data:/mosquitto/log/
+      - mosquitto-data:/mosquitto/data/
+    ports:
+      - 1883:1883
+      - 9001:9001
   mongodb:
     image: mongo:latest
     ports:
@@ -14,3 +23,4 @@ services:
 volumes:
   mongodb-data:
   redis-data:
+  mosquitto-data:

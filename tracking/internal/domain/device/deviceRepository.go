@@ -1,6 +1,8 @@
 package domainDevice
 
+import "context"
+
 type DeviceRepository interface {
-	FindById(id string) (*Device, error)
-	Save(device *Device) error
+	FindById(ctx context.Context, id string) (*Device, error)
+	Save(ctx context.Context, device *Device) error
 }
