@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/athosone/projectraven/tracking/mqttcli"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -41,7 +42,12 @@ func (l *MQTTServer) Subscribe(ctx context.Context, topic string, handler Messag
 	l.rwLock.Unlock()
 
 	token := l.client.Subscribe(topic, 1, func(client mqtt.Client, msg mqtt.Message) {
-		if err := handler(ctx, msg.Payload(), fmt.Sprint(msg.MessageID())); err != nil {
+		ctxForHandler, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctxForHandler = context.WithValue(ctxForHandler, "messageId", msg.MessageID())
+		ctxForHandler = context.WithValue(ctxForHandler, "topic", msg.Topic())
+		defer cancel()
+
+		if err := handler(ctxForHandler, msg.Payload(), fmt.Sprint(msg.MessageID())); err != nil {
 			fmt.Printf("Error handling message: %v", err)
 			return
 		}

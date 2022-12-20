@@ -29,7 +29,7 @@ func (m *PositionChangedDeviceHandler) HandleDevicePositionChanged(ctx context.C
 		Longitude: p.Position.Long,
 		Timestamp: p.Timestamp,
 	}
-	if err := handler.Handle(cmd); err != nil {
+	if err := handler.Handle(ctx, cmd); err != nil {
 		return fmt.Errorf("error handling command: %w", err)
 	}
 	return nil
