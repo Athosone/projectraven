@@ -6,7 +6,6 @@ import (
 
 	"github.com/athosone/projectraven/tracking/internal/config"
 	followposition "github.com/athosone/projectraven/tracking/internal/core/features/followPosition"
-	manageusers "github.com/athosone/projectraven/tracking/internal/core/features/manageUsers"
 	"github.com/athosone/projectraven/tracking/internal/infrastructure"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"go.uber.org/fx"
@@ -41,8 +40,6 @@ func main() {
 
 			// REST part
 			newRestServer,
-			// cf.: https://uber-go.github.io/fx/get-started/another-handler.html
-			AsRoute(manageusers.NewRestUserHandler),
 			fx.Annotate(
 				newChi,
 				fx.ParamTags(`group:"routes"`),

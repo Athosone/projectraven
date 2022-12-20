@@ -7,8 +7,6 @@ import (
 	"testing"
 
 	"github.com/athosone/golib/pkg/config"
-	"github.com/athosone/projectraven/tracking/internal/domain"
-	"github.com/athosone/projectraven/tracking/internal/infrastructure"
 	"github.com/athosone/projectraven/tracking/mongodb"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -23,7 +21,6 @@ type testConfig struct {
 }
 
 var testCfg *testConfig
-var userRepo domain.UserRepository
 
 func TestUser(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -46,7 +43,7 @@ var _ = BeforeSuite(func() {
 	By("Checking connectivity to the database")
 	Expect(mongodb.Database.Client().Ping(context.TODO(), nil)).To(Succeed())
 
-	r, err := infrastructure.NewUserRepository(mongodb.Database)
+	// r, err := infrastructure.NewUserRepository(mongodb.Database)
 	Expect(err).To(BeNil())
 	userRepo = r
 })
