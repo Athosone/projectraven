@@ -5,11 +5,18 @@
 #include <MKRNB.h>
 
 const char PINNUMBER[] = "1503";
-const char server[] = "example.org";
 
-NBClient client;
-NB nbAccess;
-GPRS gprs;
+// initialize the library instance
+NB nbAccess; // include a 'true' parameter to enable debugging
+NBScanner scannerNetworks;
+NBModem modemTest;
+NBPIN nbPin;
+
+// Save data variables
+String IMEI = "";
+
+// serial monitor result messages
+String errortext = "ERROR";
 
 void setup()
 {
@@ -17,19 +24,21 @@ void setup()
   Serial.begin(9600);
   while (!Serial)
   {
-    ; // wait for serial port to connect. Needed for native USB port only
+    ; // wait for serial port to connect. Needed for Leonardo only
   }
 
-  Serial.println("Starting Arduino web client.");
+  Serial.println("NB IoT/LTE Cat M1 networks scanner");
+  scannerNetworks.begin();
+
   // connection state
   boolean connected = false;
 
-  // After starting the modem with NB.begin()
-  // attach to the GPRS network with the APN, login and password
+  // Start module
+  // If your SIM has PIN, pass it as a parameter of begin() in quotes
   while (!connected)
   {
-    if ((nbAccess.begin(PINNUMBER) == NB_READY) &&
-        (gprs.attachGPRS() == GPRS_READY))
+    Serial.println("Connecting");
+    if (nbAccess.begin(NULL, "TM") == NB_READY)
     {
       connected = true;
     }
@@ -39,10 +48,34 @@ void setup()
       delay(1000);
     }
   }
+
+  // get modem parameters
+  // IMEI, modem unique identifier
+  Serial.print("Modem IMEI: ");
+  IMEI = modemTest.getIMEI();
+  IMEI.replace("\n", "");
+  if (IMEI != NULL)
+  {
+    Serial.println(IMEI);
+  }
 }
 
 void loop()
 {
-  Serial.println("Connected");
-  delay(1000);
+  // currently connected carrier
+  Serial.print("Current carrier: ");
+  Serial.println(scannerNetworks.getCurrentCarrier());
+
+  // returns strength and ber
+  // signal strength in 0-31 scale. 31 means power > 51dBm
+  // BER is the Bit Error Rate. 0-7 scale. 99=not detectable
+  Serial.print("Signal Strength: ");
+  Serial.print(scannerNetworks.getSignalStrength());
+  Serial.println(" [0-31]");
+
+  // scan for existing networks, displays a list of networks
+  Serial.println("Scanning available networks. May take some seconds.");
+  Serial.println(scannerNetworks.readNetworks());
+  // wait ten seconds before scanning again
+  delay(10000);
 }

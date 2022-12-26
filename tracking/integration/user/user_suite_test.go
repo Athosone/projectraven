@@ -45,5 +45,4 @@ var _ = BeforeSuite(func() {
 
 	// r, err := infrastructure.NewUserRepository(mongodb.Database)
 	Expect(err).To(BeNil())
-	userRepo = r
 })

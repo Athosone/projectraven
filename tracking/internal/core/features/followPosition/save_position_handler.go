@@ -3,6 +3,7 @@ package followposition
 import (
 	"context"
 
+	domain "github.com/athosone/projectraven/tracking/internal/domain"
 	domainDevice "github.com/athosone/projectraven/tracking/internal/domain/device"
 )
 
@@ -15,11 +16,12 @@ type SavePositionCommand struct {
 
 type SavePositionCommandHandler struct {
 	deviceRepository domainDevice.DeviceRepository
+	eventRepository  domain.EventRepository
 }
 
 // TODO: Add jetstream event publisher
-func NewSavePositionCommandHandler(deviceRepository domainDevice.DeviceRepository) (*SavePositionCommandHandler, error) {
-	return &SavePositionCommandHandler{deviceRepository: deviceRepository}, nil
+func NewSavePositionCommandHandler(deviceRepository domainDevice.DeviceRepository, eventRepository domain.EventRepository) (*SavePositionCommandHandler, error) {
+	return &SavePositionCommandHandler{deviceRepository: deviceRepository, eventRepository: eventRepository}, nil
 }
 
 // TODO: Publish event using jetstream
@@ -37,5 +39,8 @@ func (h *SavePositionCommandHandler) Handle(ctx context.Context, command SavePos
 	}
 	// update the position of the device and save it
 	device.UpdatePosition(command.Latitude, command.Longitude)
+
+	// TODO: use outbox pattern
+
 	return h.deviceRepository.CreateOrUpdate(ctx, device)
 }
