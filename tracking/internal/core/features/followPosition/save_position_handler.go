@@ -17,10 +17,12 @@ type SavePositionCommandHandler struct {
 	deviceRepository domainDevice.DeviceRepository
 }
 
+// TODO: Add jetstream event publisher
 func NewSavePositionCommandHandler(deviceRepository domainDevice.DeviceRepository) (*SavePositionCommandHandler, error) {
 	return &SavePositionCommandHandler{deviceRepository: deviceRepository}, nil
 }
 
+// TODO: Publish event using jetstream
 func (h *SavePositionCommandHandler) Handle(ctx context.Context, command SavePositionCommand) error {
 	device, err := h.deviceRepository.FindById(ctx, command.DeviceId)
 	// if err not nil and err is not of type ErrDeviceNotFound, return err
