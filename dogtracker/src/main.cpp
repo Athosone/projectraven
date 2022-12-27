@@ -38,7 +38,7 @@ void setup()
   while (!connected)
   {
     Serial.println("Connecting");
-    if (nbAccess.begin(NULL, "TM") == NB_READY)
+    if (nbAccess.begin(NULL) == NB_READY)
     {
       connected = true;
     }

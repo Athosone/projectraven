@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,6 +12,8 @@ type DomainEvent struct {
 	CreatedAtUTC time.Time
 }
 
-type EventRepository interface {
-	Save(event any) error
+type EventPublisher func(ctx context.Context, topic string, msg []byte) error
+
+type EventBus interface {
+	EventPublisher
 }

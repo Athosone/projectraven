@@ -2,6 +2,8 @@ package followposition
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	domain "github.com/athosone/projectraven/tracking/internal/domain"
 	domainDevice "github.com/athosone/projectraven/tracking/internal/domain/device"
@@ -16,12 +18,12 @@ type SavePositionCommand struct {
 
 type SavePositionCommandHandler struct {
 	deviceRepository domainDevice.DeviceRepository
-	eventRepository  domain.EventRepository
+	eventPublisher   domain.EventPublisher
 }
 
 // TODO: Add jetstream event publisher
-func NewSavePositionCommandHandler(deviceRepository domainDevice.DeviceRepository, eventRepository domain.EventRepository) (*SavePositionCommandHandler, error) {
-	return &SavePositionCommandHandler{deviceRepository: deviceRepository, eventRepository: eventRepository}, nil
+func NewSavePositionCommandHandler(deviceRepository domainDevice.DeviceRepository, publisher domain.EventPublisher) (*SavePositionCommandHandler, error) {
+	return &SavePositionCommandHandler{deviceRepository: deviceRepository, eventPublisher: publisher}, nil
 }
 
 // TODO: Publish event using jetstream
@@ -39,8 +41,20 @@ func (h *SavePositionCommandHandler) Handle(ctx context.Context, command SavePos
 	}
 	// update the position of the device and save it
 	device.UpdatePosition(command.Latitude, command.Longitude)
-
+	ue := device.UncommittedEvents
+	for _, e := range ue {
+		topic, msg := formatMsg(domainDevice.RootDeviceTopic, device.ID, e)
+		if err := h.eventPublisher(ctx, topic, msg); err != nil {
+			return err
+		}
+	}
 	// TODO: use outbox pattern
 
 	return h.deviceRepository.CreateOrUpdate(ctx, device)
+}
+
+func formatMsg(rootTopic string, deviceId string, event any) (string, []byte) {
+	topic := fmt.Sprintf("%s.%s.positionChanged", rootTopic, deviceId)
+	data, _ := json.Marshal(event)
+	return topic, data
 }

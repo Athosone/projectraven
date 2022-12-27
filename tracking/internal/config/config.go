@@ -30,9 +30,12 @@ type AppConfig struct {
 		ClientID string `yaml:"clientID"`
 	} `yaml:"mqtt"`
 
+	Nats struct {
+		URL string `yaml:"url"`
+	} `yaml:"nats"`
+
 	Feature struct {
 		FollowPosition struct {
-			Topic string `yaml:"topic"`
 		} `yaml:"followPosition"`
 	} `yaml:"feature"`
 }
@@ -51,7 +54,7 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	_ = viper.BindEnv("database.databaseName", "DATABASE_DATABASE_NAME")
 	_ = viper.BindEnv("mqtt.broker", "MQTT_BROKER")
 	_ = viper.BindEnv("mqtt.clientID", "MQTT_CLIENT_ID")
-	_ = viper.BindEnv("feature.followPosition.topic", "FEATURE_FOLLOW_POSITION_TOPIC")
+	_ = viper.BindEnv("nats.url", "NATS_URL")
 
 	viper.SetDefault("isDebug", "true")
 	viper.SetDefault("service.port", "5001")
@@ -61,7 +64,7 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	viper.SetDefault("database.databaseName", "projectraven")
 	viper.SetDefault("mqtt.broker", "mqtt://localhost:1883")
 	viper.SetDefault("mqtt.clientID", "projectraven-tracking")
-	viper.SetDefault("feature.followPosition.topic", "followPosition")
+	viper.SetDefault("nats.url", "nats://localhost:4222")
 
 	cfg, err = config.LoadConfig[AppConfig](os.Getenv("CONFIG_PATH"))
 	if *debug {

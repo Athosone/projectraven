@@ -4,6 +4,7 @@
     "athosone",
     "manageusers",
     "mqttcli",
+    "nats",
     "openapi",
     "projectraven"
   ]

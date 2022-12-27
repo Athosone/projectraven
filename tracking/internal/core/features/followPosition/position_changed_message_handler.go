@@ -9,15 +9,15 @@ import (
 	"github.com/athosone/projectraven/tracking/internal/core/features/followPosition/contracts"
 )
 
-type MQTTPositionChangedDeviceHandler struct {
+type MQTTDevicePositionChangedHandler struct {
 	handler *SavePositionCommandHandler
 }
 
-func NewPositionChangedMessageHandler(handler *SavePositionCommandHandler) *MQTTPositionChangedDeviceHandler {
-	return &MQTTPositionChangedDeviceHandler{handler: handler}
+func NewPositionChangedMessageHandler(topic string, handler *SavePositionCommandHandler) *MQTTDevicePositionChangedHandler {
+	return &MQTTDevicePositionChangedHandler{handler: handler}
 }
 
-func (m *MQTTPositionChangedDeviceHandler) HandleDevicePositionChanged(ctx context.Context, payload []byte, messageId string) error {
+func (m *MQTTDevicePositionChangedHandler) HandleDevicePositionChanged(ctx context.Context, payload []byte, messageId string) error {
 	var p contracts.PositionChangedMessage
 	if err := json.Unmarshal(payload, &p); err != nil {
 		return fmt.Errorf("error unmarshaling message: %w", err)
@@ -35,6 +35,6 @@ func (m *MQTTPositionChangedDeviceHandler) HandleDevicePositionChanged(ctx conte
 	return nil
 }
 
-func (m *MQTTPositionChangedDeviceHandler) SubscribeToTopic(ctx context.Context, server *mqttcli.MQTTServer) error {
-	return server.Subscribe(ctx, "device.position.changed", m.HandleDevicePositionChanged)
+func (m *MQTTDevicePositionChangedHandler) SubscribeToTopic(ctx context.Context, server *mqttcli.MQTTServer) error {
+	return server.Subscribe(ctx, contracts.MQTTTopicListened, m.HandleDevicePositionChanged)
 }
