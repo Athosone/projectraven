@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 
 	mqttcli "github.com/athosone/projectraven/tracking/internal/api/mqtt"
 	"github.com/athosone/projectraven/tracking/internal/config"
@@ -15,15 +14,26 @@ type MQTTMessageListener interface {
 	SubscribeToTopic(ctx context.Context, server *mqttcli.MQTTServer) error
 }
 
-func subscribeListeners(messageListeners []MQTTMessageListener, srv *mqttcli.MQTTServer) (mqtt.Client, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+func subscribeListeners(messageListeners []MQTTMessageListener, srv *mqttcli.MQTTServer, lc fx.Lifecycle) (mqtt.Client, error) {
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			if token := srv.Client().Connect(); token.Wait() && token.Error() != nil {
+				err := token.Error()
+				return fmt.Errorf("error connecting to MQTT broker: %w", err)
+			}
 
-	for _, listener := range messageListeners {
-		if err := listener.SubscribeToTopic(ctx, srv); err != nil {
-			return nil, fmt.Errorf("error subscribing to topic: %w", err)
-		}
-	}
+			for _, listener := range messageListeners {
+				if err := listener.SubscribeToTopic(ctx, srv); err != nil {
+					return fmt.Errorf("error subscribing to topic: %w", err)
+				}
+			}
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			srv.Client().Disconnect(2000)
+			return nil
+		},
+	})
 
 	return srv.Client(), nil
 }
@@ -33,12 +43,7 @@ func newMQTTListener(cfg *config.AppConfig) (*mqttcli.MQTTServer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error creating MQTT client: %w", err)
 	}
-	if !srv.Client().IsConnected() {
-		if token := srv.Client().Connect(); token.Wait() && token.Error() != nil {
-			err := token.Error()
-			return nil, fmt.Errorf("error connecting to MQTT broker: %w", err)
-		}
-	}
+
 	return srv, nil
 }
 

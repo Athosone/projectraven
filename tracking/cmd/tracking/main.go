@@ -54,11 +54,15 @@ func main() {
 				fx.ParamTags(`group:"mqttListeners"`),
 			),
 
-			// Repositories
+			// Infrastructure
 			infrastructure.NewDeviceRepository,
-
+			infrastructure.NewEventPublisher,
+      
 			// Database
 			newMongoDB,
+
+			// Nats
+			newNats,
 		),
 		fx.Invoke(func(*http.Server) {}),
 		fx.Invoke(func(mqtt.Client) {}),

@@ -22,6 +22,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	cli.Connect().Wait()
+  defer cli.Disconnect(250)
 	go func() {
 		for {
 			// generate random position

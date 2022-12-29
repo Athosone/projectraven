@@ -29,11 +29,12 @@ func NewSavePositionCommandHandler(deviceRepository domainDevice.DeviceRepositor
 // TODO: Publish event using jetstream
 func (h *SavePositionCommandHandler) Handle(ctx context.Context, command SavePositionCommand) error {
 	device, err := h.deviceRepository.FindById(ctx, command.DeviceId)
-	// if err not nil and err is not of type ErrDeviceNotFound, return err
+
 	if err != nil && !domainDevice.IsErrDeviceNotFound(err) {
 		return err
 	}
 	// if err is of type ErrDeviceNotFound, create a new device
+	// Eventually this would change when a process to enroll devices exists
 	if domainDevice.IsErrDeviceNotFound(err) {
 		device = &domainDevice.Device{
 			ID: command.DeviceId,
@@ -49,7 +50,7 @@ func (h *SavePositionCommandHandler) Handle(ctx context.Context, command SavePos
 		}
 	}
 	// TODO: use outbox pattern
-
+	// TODO: This imply to have a transaction
 	return h.deviceRepository.CreateOrUpdate(ctx, device)
 }
 

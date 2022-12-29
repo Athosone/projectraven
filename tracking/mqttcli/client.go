@@ -1,8 +1,6 @@
 package mqttcli
 
 import (
-	"fmt"
-
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -19,10 +17,6 @@ func NewClient(broker string, clientID string) (mqtt.Client, error) {
 		SetAutoAckDisabled(true)
 
 	client = mqtt.NewClient(opts)
-	token := client.Connect()
-	if !token.Wait() || token.Error() != nil {
-		return nil, fmt.Errorf("error connecting to MQTT broker: %w", token.Error())
-	}
 	return client, nil
 }
 

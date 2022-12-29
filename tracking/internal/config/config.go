@@ -31,7 +31,8 @@ type AppConfig struct {
 	} `yaml:"mqtt"`
 
 	Nats struct {
-		URL string `yaml:"url"`
+		URL        string `yaml:"url"`
+		StreamName string `yaml:"streamName"`
 	} `yaml:"nats"`
 
 	Feature struct {
@@ -55,6 +56,8 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	_ = viper.BindEnv("mqtt.broker", "MQTT_BROKER")
 	_ = viper.BindEnv("mqtt.clientID", "MQTT_CLIENT_ID")
 	_ = viper.BindEnv("nats.url", "NATS_URL")
+	_ = viper.BindEnv("nats.streamName", "NATS_STREAM_NAME")
+	_ = viper.BindEnv("nats.subjects", "NATS_SUBJECTS")
 
 	viper.SetDefault("isDebug", "true")
 	viper.SetDefault("service.port", "5001")
@@ -65,6 +68,7 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	viper.SetDefault("mqtt.broker", "mqtt://localhost:1883")
 	viper.SetDefault("mqtt.clientID", "projectraven-tracking")
 	viper.SetDefault("nats.url", "nats://localhost:4222")
+	viper.SetDefault("nats.streamName", "projectraven-tracking")
 
 	cfg, err = config.LoadConfig[AppConfig](os.Getenv("CONFIG_PATH"))
 	if *debug {

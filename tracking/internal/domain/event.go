@@ -13,7 +13,3 @@ type DomainEvent struct {
 }
 
 type EventPublisher func(ctx context.Context, topic string, msg []byte) error
-
-type EventBus interface {
-	EventPublisher
-}

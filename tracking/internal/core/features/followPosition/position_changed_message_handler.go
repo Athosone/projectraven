@@ -13,7 +13,7 @@ type MQTTDevicePositionChangedHandler struct {
 	handler *SavePositionCommandHandler
 }
 
-func NewPositionChangedMessageHandler(topic string, handler *SavePositionCommandHandler) *MQTTDevicePositionChangedHandler {
+func NewPositionChangedMessageHandler(handler *SavePositionCommandHandler) *MQTTDevicePositionChangedHandler {
 	return &MQTTDevicePositionChangedHandler{handler: handler}
 }
 

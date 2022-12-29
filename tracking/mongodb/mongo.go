@@ -47,3 +47,13 @@ func InitClient(ctx context.Context, cfg *MongoDBConfig) error {
 	zap.S().Info("Mongo client created")
 	return nil
 }
+
+func Shutdown(ctx context.Context) error {
+	if client == nil {
+		return nil
+	}
+	if err := client.Disconnect(ctx); err != nil {
+		return fmt.Errorf("disconnect mongo client: %w", err)
+	}
+	return nil
+}
