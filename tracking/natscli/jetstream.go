@@ -41,6 +41,7 @@ func Configure(cfg *NatsConfig) error {
 	}
 
 	// create stream
+	// Eventually replace with NACK controller and crds
 	_, err = JetstreamCtx.AddStream(&nats.StreamConfig{
 		Name:      cfg.StreamName,
 		Subjects:  cfg.Subjects,

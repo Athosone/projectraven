@@ -16,7 +16,7 @@ type AppConfig struct {
 		RequestIdHeader string `yaml:"requestIdHeader"`
 	} `yaml:"service"`
 
-	Database struct {
+	MongoDB struct {
 		ConnectionString string `yaml:"connectionString"`
 		DatabaseName     string `yaml:"databaseName"`
 	} `yaml:"database"`
@@ -39,6 +39,13 @@ type AppConfig struct {
 		FollowPosition struct {
 		} `yaml:"followPosition"`
 	} `yaml:"feature"`
+
+	InfluxDB struct {
+		URL    string `yaml:"url"`
+		Token  string `yaml:"token"`
+		Org    string `yaml:"org"`
+		Bucket string `yaml:"bucket"`
+	} `yaml:"influxdb"`
 }
 
 // LoadConfig loads the configuration from the environment variable CONFIG_PATH.LoadConfig
@@ -58,6 +65,10 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	_ = viper.BindEnv("nats.url", "NATS_URL")
 	_ = viper.BindEnv("nats.streamName", "NATS_STREAM_NAME")
 	_ = viper.BindEnv("nats.subjects", "NATS_SUBJECTS")
+	_ = viper.BindEnv("influxdb.addr", "INFLUXDB_URL")
+	_ = viper.BindEnv("influxdb.token", "INFLUXDB_TOKEN")
+	_ = viper.BindEnv("influxdb.org", "INFLUXDB_ORG")
+	_ = viper.BindEnv("influxdb.bucket", "INFLUXDB_BUCKET")
 
 	viper.SetDefault("isDebug", "true")
 	viper.SetDefault("service.port", "5001")
@@ -69,6 +80,11 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	viper.SetDefault("mqtt.clientID", "projectraven-tracking")
 	viper.SetDefault("nats.url", "nats://localhost:4222")
 	viper.SetDefault("nats.streamName", "projectraven-tracking")
+
+	viper.SetDefault("influxdb.addr", "http://localhost:8086")
+	viper.SetDefault("influxdb.token", "")
+	viper.SetDefault("influxdb.org", "raven")
+	viper.SetDefault("influxdb.bucket", "raven")
 
 	cfg, err = config.LoadConfig[AppConfig](os.Getenv("CONFIG_PATH"))
 	if *debug {

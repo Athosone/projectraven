@@ -12,7 +12,7 @@ import (
 func newMongoDB(cfg *config.AppConfig) (*mongo.Database, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	mCfg := mongodb.MongoDBConfig(cfg.Database)
+	mCfg := mongodb.MongoDBConfig(cfg.MongoDB)
 
 	err := mongodb.InitClient(ctx, &mCfg)
 	if err != nil {

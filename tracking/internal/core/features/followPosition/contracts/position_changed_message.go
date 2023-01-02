@@ -1,6 +1,16 @@
 package contracts
 
-const MQTTTopicListened = "device.position.changed"
+import (
+	"fmt"
+
+	domainDevice "github.com/athosone/projectraven/tracking/internal/domain/device"
+)
+
+const MQTTTopicListened = domainDevice.RootDeviceTopic + ".position.changed"
+
+func JetStreamDevicePositionChangedSubject(deviceId string) string {
+	return fmt.Sprintf("%s.%s.position.changed", domainDevice.RootDeviceTopic, deviceId)
+}
 
 type PositionChangedMessage struct {
 	MessageId string   `json:"message_id"`

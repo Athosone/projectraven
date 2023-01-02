@@ -3,6 +3,7 @@ package rest
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	gmiddleware "github.com/athosone/golib/pkg/server/middleware"
 	"github.com/go-chi/chi/v5"
@@ -11,9 +12,10 @@ import (
 )
 
 type RestServer struct {
-	*chi.Mux
+	Mux    *chi.Mux
 	Addr   string
 	logger *zap.SugaredLogger
+	Server *http.Server
 }
 
 type HttpServerConfig struct {
@@ -42,11 +44,16 @@ func NewHttpServer(logger *zap.SugaredLogger, cfg HttpServerConfig) *RestServer 
 		r.Handle("/debug/pprof/", http.DefaultServeMux)
 		r.Handle("/openapi/", http.StripPrefix("/openapi/", http.FileServer(http.Dir("./docs"))))
 	}
+	srv := &http.Server{Addr: cfg.Addr, Handler: r,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
 
 	return &RestServer{
 		Mux:    r,
 		Addr:   cfg.Addr,
 		logger: logger,
+		Server: srv,
 	}
 }
 
