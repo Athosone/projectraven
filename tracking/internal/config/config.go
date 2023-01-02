@@ -19,7 +19,7 @@ type AppConfig struct {
 	MongoDB struct {
 		ConnectionString string `yaml:"connectionString"`
 		DatabaseName     string `yaml:"databaseName"`
-	} `yaml:"database"`
+	} `yaml:"mongodb"`
 
 	// IsDebug
 	IsDebug bool `yaml:"isDebug"`
@@ -40,7 +40,7 @@ type AppConfig struct {
 		} `yaml:"followPosition"`
 	} `yaml:"feature"`
 
-	InfluxDB struct {
+	InfluxDb struct {
 		URL    string `yaml:"url"`
 		Token  string `yaml:"token"`
 		Org    string `yaml:"org"`
@@ -58,30 +58,36 @@ func LoadConfig() (cfg *AppConfig, err error) {
 	_ = viper.BindEnv("service.port", "SERVICE_PORT")
 	_ = viper.BindEnv("service.host", "SERVICE_HOST")
 	_ = viper.BindEnv("service.requestIdHeader", "SERVICE_REQUEST_ID_HEADER")
-	_ = viper.BindEnv("database.connectionString", "DATABASE_CONNECTION_STRING")
-	_ = viper.BindEnv("database.databaseName", "DATABASE_DATABASE_NAME")
+
+	_ = viper.BindEnv("mongodb.connectionString", "MONGODB_CONNECTION_STRING")
+	_ = viper.BindEnv("mongodb.databaseName", "MONGODB_DATABASE_NAME")
 	_ = viper.BindEnv("mqtt.broker", "MQTT_BROKER")
 	_ = viper.BindEnv("mqtt.clientID", "MQTT_CLIENT_ID")
 	_ = viper.BindEnv("nats.url", "NATS_URL")
 	_ = viper.BindEnv("nats.streamName", "NATS_STREAM_NAME")
 	_ = viper.BindEnv("nats.subjects", "NATS_SUBJECTS")
+
 	_ = viper.BindEnv("influxdb.addr", "INFLUXDB_URL")
 	_ = viper.BindEnv("influxdb.token", "INFLUXDB_TOKEN")
 	_ = viper.BindEnv("influxdb.org", "INFLUXDB_ORG")
 	_ = viper.BindEnv("influxdb.bucket", "INFLUXDB_BUCKET")
 
 	viper.SetDefault("isDebug", "true")
+
 	viper.SetDefault("service.port", "5001")
 	viper.SetDefault("service.host", "0.0.0.0")
 	viper.SetDefault("service.requestIdHeader", middleware.RequestIDHeader)
-	viper.SetDefault("database.connectionString", "mongodb://localhost:27017")
-	viper.SetDefault("database.databaseName", "projectraven")
+
+	viper.SetDefault("mongodb.connectionString", "mongodb://localhost:27017")
+	viper.SetDefault("mongodb.databaseName", "projectraven")
+
 	viper.SetDefault("mqtt.broker", "mqtt://localhost:1883")
 	viper.SetDefault("mqtt.clientID", "projectraven-tracking")
+
 	viper.SetDefault("nats.url", "nats://localhost:4222")
 	viper.SetDefault("nats.streamName", "projectraven-tracking")
 
-	viper.SetDefault("influxdb.addr", "http://localhost:8086")
+	viper.SetDefault("influxdb.url", "http://localhost:8086")
 	viper.SetDefault("influxdb.token", "")
 	viper.SetDefault("influxdb.org", "raven")
 	viper.SetDefault("influxdb.bucket", "raven")

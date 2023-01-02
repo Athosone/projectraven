@@ -8,6 +8,7 @@ import (
 	followposition "github.com/athosone/projectraven/tracking/internal/core/features/followPosition"
 	"github.com/athosone/projectraven/tracking/internal/infrastructure"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/joho/godotenv"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
@@ -28,6 +29,10 @@ func init() {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
 	fx.New(
 		// fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
 		// 	return &fxevent.ZapLogger{Logger: log}
@@ -57,7 +62,7 @@ func main() {
 			// Infrastructure
 			infrastructure.NewDeviceRepository,
 			infrastructure.NewEventPublisher,
-      
+
 			// Database
 			newMongoDB,
 

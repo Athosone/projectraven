@@ -23,8 +23,9 @@ func newNats(cfg *config.AppConfig) (nats.JetStreamContext, error) {
 	}
 	jsctx := natscli.JetstreamCtx
 	_, err = jsctx.AddConsumer(cfg.Nats.StreamName, &nats.ConsumerConfig{
-		Durable:   durableName,
-		AckPolicy: nats.AckExplicitPolicy,
+		Durable:      durableName,
+		AckPolicy:    nats.AckExplicitPolicy,
+		ReplayPolicy: nats.ReplayInstantPolicy,
 	})
 	if err != nil {
 		// handle error if consumer already exists

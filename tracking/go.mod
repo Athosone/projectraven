@@ -7,7 +7,9 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.4.2
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/uuid v1.3.0
+	github.com/influxdata/influxdb-client-go v1.4.0
 	github.com/influxdata/influxdb-client-go/v2 v2.12.1
+	github.com/joho/godotenv v1.4.0
 	github.com/nats-io/nats.go v1.22.1
 	github.com/spf13/viper v1.11.0
 	go.mongodb.org/mongo-driver v1.10.2

@@ -3,8 +3,8 @@ package followposition
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
+	"github.com/athosone/projectraven/tracking/internal/core/features/followPosition/contracts"
 	domain "github.com/athosone/projectraven/tracking/internal/domain"
 	domainDevice "github.com/athosone/projectraven/tracking/internal/domain/device"
 )
@@ -44,7 +44,7 @@ func (h *SavePositionCommandHandler) Handle(ctx context.Context, command SavePos
 	device.UpdatePosition(command.Latitude, command.Longitude)
 	ue := device.UncommittedEvents
 	for _, e := range ue {
-		topic, msg := formatMsg(domainDevice.RootDeviceTopic, device.ID, e)
+		topic, msg := formatMsg(device.ID, e)
 		if err := h.eventPublisher(ctx, topic, msg); err != nil {
 			return err
 		}
@@ -54,8 +54,8 @@ func (h *SavePositionCommandHandler) Handle(ctx context.Context, command SavePos
 	return h.deviceRepository.CreateOrUpdate(ctx, device)
 }
 
-func formatMsg(rootTopic string, deviceId string, event any) (string, []byte) {
-	topic := fmt.Sprintf("%s.%s.positionChanged", rootTopic, deviceId)
+func formatMsg(deviceId string, event any) (string, []byte) {
+	topic := contracts.JetStreamDevicePositionChangedSubject(deviceId)
 	data, _ := json.Marshal(event)
 	return topic, data
 }

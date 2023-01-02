@@ -16,7 +16,6 @@ var JetstreamCtx nats.JetStreamContext
 
 func InitClient(cfg *NatsConfig) error {
 	nc, err := nats.Connect(cfg.URL)
-
 	if err != nil {
 		return fmt.Errorf("error connecting to NATS: %w", err)
 	}
@@ -34,8 +33,9 @@ func Configure(cfg *NatsConfig) error {
 	_, err := JetstreamCtx.StreamInfo(cfg.StreamName)
 	if err == nil {
 		_, err = JetstreamCtx.UpdateStream(&nats.StreamConfig{
-			Name:     cfg.StreamName,
-			Subjects: cfg.Subjects,
+			Name:      cfg.StreamName,
+			Subjects:  cfg.Subjects,
+			Retention: nats.LimitsPolicy,
 		})
 		return err
 	}
